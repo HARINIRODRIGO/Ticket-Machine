@@ -1,22 +1,20 @@
-package com.iit.concurrentProgramming.Coursework.TicketMachine;
+package com.iit.concurrentProgramming.Coursework.ticket_machine;
 
-import com.iit.concurrentProgramming.Coursework.TicketMachineSettings.Colors;
-import com.iit.concurrentProgramming.Coursework.TicketMachineSettings.ConstantValues;
-import lombok.NonNull;
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.*;
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.*;
 
-import static com.iit.concurrentProgramming.Coursework.TicketMachineSettings.ConstantValues.*;
-import static com.iit.concurrentProgramming.Coursework.TicketMachineSettings.SystemOutputs.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * Class representing a ticket printing machine that ensures concurrent and safe operation.
+ *
  * @Author: Harini Rodrigo
- * @Project: Concurrent Programming Coursework
- * @Version 1.0
- * @Since 26/11/2023
+ * @Version: 1.0
+ * @Since: 26/11/2023
  * @Description: The `TicketMachine` class ensures the concurrent and safe operation of a ticket printing machine.
  * It incorporates a fixed-size thread pool to handle concurrent tasks and a ReentrantLock for synchronization.
  * The class tracks toner and paper levels, along with refill counts. Printing tasks are submitted to the thread pool,
@@ -27,36 +25,38 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 
-public class TicketMachine implements ServiceTicketMachine, Printer, Colors {
+public class TicketMachine implements ServiceTicketMachine, Printer {
     @lombok.NonNull
     private int currentPaperLevel, currentTonerLevel;
-    private ReentrantLock lock = new ReentrantLock();
-    private final Condition tonerAvilability = lock.newCondition();
-    private final Condition paperAvilability = lock.newCondition();
-    private final Condition resourceAvilability = lock.newCondition();
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition tonerAvailability = lock.newCondition();
+    private final Condition paperAvailability = lock.newCondition();
+    private final Condition resourceAvailability = lock.newCondition();
     public static ArrayList<Ticket> passengers = new ArrayList<>();
     private int tonerRefillCount = 0;
     private int paperRefillCount = 0;
-    public TicketMachine(@NonNull int currentPaperLevel, @NonNull int currentTonerLevel) {
+
+
+    public TicketMachine(int currentPaperLevel, int currentTonerLevel, List<Ticket> passengers) {
         this.currentPaperLevel = currentPaperLevel;
         this.currentTonerLevel = currentTonerLevel;
-        passengerQuesue(TicketPrintingSystem.getTickets());
+        passengerQueue(passengers);
     }
 
     /**
      * Checks if there is sufficient paper and toner for printing.
      *
      * @return "INSUFFICIENT_TONER_AND_PAPER": if both paper and toner are inadequate,<br>
-     *         "INSUFFICIENT_PAPER" : if paper is insufficient,<br>
-     *         "INSUFFICIENT_TONER": if toner is insufficient,<br>
-     *         "PRINTABLE": if both paper and toner are sufficient.<br>
+     * "INSUFFICIENT_PAPER" : if paper is insufficient,<br>
+     * "INSUFFICIENT_TONER": if toner is insufficient,<br>
+     * "PRINTABLE": if both paper and toner are sufficient.<br>
      */
     private String isResourceAvailable() {
-        if(currentPaperLevel <= 0 & currentTonerLevel <= MINIMUM_TONER_LEVEL) {
+        if (currentPaperLevel <= 0 & currentTonerLevel <= MINIMUM_TONER_LEVEL) {
             return INSUFFICIENT_TONER_AND_PAPER;
-        } else if(currentPaperLevel <= 0) {
+        } else if (currentPaperLevel <= 0) {
             return INSUFFICIENT_PAPER;
-        } else if(currentTonerLevel <= MINIMUM_TONER_LEVEL) {
+        } else if (currentTonerLevel <= MINIMUM_TONER_LEVEL) {
             return INSUFFICIENT_TONER;
         }
         return PRINTABLE;
@@ -77,30 +77,23 @@ public class TicketMachine implements ServiceTicketMachine, Printer, Colors {
             lock.lock();
 
             while (!isResourceAvailable().equals(PRINTABLE)) {
-                if(passengers.size() == 0) {
+                if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + NO_PASSENGERS_MSG + ANSI_RESET);
                     return;
-                }else {
-//                    if (isResourceAvailable().equals(INSUFFICIENT_TONER_AND_PAPER)) {
-//                        System.out.println(ANSI_YELLOW + NOT_PRINTABLE_MSG + INSUFFICIENT_TONER_AND_PAPER + ANSI_RESET);
-//                    } else if (isResourceAvailable().equals(INSUFFICIENT_PAPER)) {
-//                        System.out.println(ANSI_YELLOW + NOT_PRINTABLE_MSG + INSUFFICIENT_PAPER + ANSI_RESET);
-//                    } else{
-//                        System.out.println(ANSI_YELLOW +NOT_PRINTABLE_MSG + INSUFFICIENT_TONER + ANSI_RESET);
-//                    }
-                    resourceAvilability.await(1000, TimeUnit.MILLISECONDS);
                 }
+                resourceAvailability.await();
             }
-            if(passengers.size() != 0) {
+            if (!passengers.isEmpty()) {
                 this.currentTonerLevel--;
                 this.currentPaperLevel--;
-                System.out.println(ANSI_GREEN + ticket + ANSI_RESET);
+                System.out.println(newTicket + ANSI_GREEN + ticket + ANSI_RESET);
                 passengers.remove(ticket);
-                paperAvilability.signalAll();
-                tonerAvilability.signalAll();
+                paperAvailability.signalAll();
+                tonerAvailability.signalAll();
+                resourceAvailability.signalAll();
             }
-        }  catch (InterruptedException e) {
-            return;
+        } catch (InterruptedException e) {
+            System.out.println(ANSI_RED + TICKET_PRINTING_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         } finally {
             lock.unlock();
         }
@@ -121,26 +114,27 @@ public class TicketMachine implements ServiceTicketMachine, Printer, Colors {
             lock.lock();
 
             while ((currentPaperLevel + SHEETS_PER_PACK) >= FULL_PAPER_TRAY) {
-                if(passengers.size() == 0) {
-                    System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
+                if (passengers.isEmpty()) {
+                    System.out.println(ANSI_RED + PAPER_REPLACE_SKIP_MSG + ANSI_RESET);
                     break;
-                }else {
+                } else {
                     System.out.println(ANSI_BLUE + SHEETS_IN_TRAY_MSG + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
-                    paperAvilability.await(PAPER_TECH_WAITING_TIME, TimeUnit.MILLISECONDS);
+                    paperAvailability.await();
                 }
             }
-            if(passengers.size() != 0 & currentPaperLevel == 0) {
+            if (!passengers.isEmpty() & currentPaperLevel == 0) {
+                System.out.println(ANSI_YELLOW + REFILL_WAITING + ANSI_RESET);
                 currentPaperLevel += SHEETS_PER_PACK;
-                System.out.println(ANSI_BLUE + REFILL_COMPLETE_MSG + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
+                System.out.println(ANSI_PURPLE + REFILL_COMPLETE_MSG + ANSI_RESET);
                 paperRefillCount++;
-                paperAvilability.signalAll();
+                paperAvailability.signalAll();
+                System.out.println(ANSI_BLUE + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
             }
-            if(passengers.size() != 0 & paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT) {
-                System.out.println(ANSI_RED + PRINT_SKIP_TICKET_MSG + ANSI_RESET);
-                return;
+            if (!passengers.isEmpty() & paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT) {
+                System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
             }
         } catch (InterruptedException e) {
-            return;
+            System.out.println(ANSI_RED + REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         } finally {
             lock.unlock();
         }
@@ -161,33 +155,38 @@ public class TicketMachine implements ServiceTicketMachine, Printer, Colors {
         try {
             lock.lock();
             while (currentTonerLevel + MINIMUM_TONER_LEVEL >= MAXIMUM_TONER_LEVEL) {
-                if(passengers.size() == 0) {
+                if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + TONER_REPLACE_SKIP_MSG + ANSI_RESET);
                     break;
                 } else {
                     System.out.println(ANSI_BLUE + TONER_NOT_REPLACEABLE_MSG + TONER_LEVEL_MSG + currentTonerLevel + ANSI_RESET);
-                    tonerAvilability.await(TONER_TECH_WAITING_TIME, TimeUnit.MILLISECONDS);
+                    tonerAvailability.await();
                 }
             }
-            if(passengers.size() != 0) {
+            if (!passengers.isEmpty()) {
+                System.out.println(ANSI_YELLOW + REFILL_WAITING + ANSI_RESET);
                 currentTonerLevel += MINIMUM_TONER_LEVEL;
-                System.out.println(ANSI_BLUE + TONER_REPLACED_MSG + TONER_LEVEL_MSG + currentTonerLevel + ANSI_RESET);
+                System.out.println(ANSI_PURPLE + TONER_REPLACED_MSG + ANSI_RESET);
                 tonerRefillCount++;
-                tonerAvilability.signalAll();
+                System.out.println(ANSI_BLUE + TONER_LEVEL_MSG + currentTonerLevel + ANSI_RESET);
+                tonerAvailability.signalAll();
             }
-            if(TicketMachine.passengers.size() != 0 & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
-                System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
-                return;
+            if (!TicketMachine.passengers.isEmpty() & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
+                System.out.println(ANSI_RED + TONER_REFILL_SKIP_MSG + ANSI_RESET);
             }
         } catch (InterruptedException e) {
-            return;
+            System.out.println(ANSI_RED + REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         } finally {
             lock.unlock();
         }
     }
-  private void passengerQuesue(List<Ticket> tickets) {
-            for (Ticket ticket : tickets) {
-                passengers.add(ticket);
-            }
+
+    /**
+     * Helper method to enqueue passengers by adding them to the passengers list.
+     *
+     * @param tickets List of tickets representing passengers.
+     */
+    private void passengerQueue(List<Ticket> tickets) {
+        passengers.addAll(tickets);
     }
 }

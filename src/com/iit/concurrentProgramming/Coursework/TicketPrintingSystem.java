@@ -1,24 +1,34 @@
-package com.iit.concurrentProgramming.Coursework.TicketMachine;
+package com.iit.concurrentProgramming.Coursework;
 
-import com.iit.concurrentProgramming.Coursework.TicketMachine.TicketDetailInfo.PassengerInfo;
-import com.iit.concurrentProgramming.Coursework.TicketMachine.TicketDetailInfo.TravelInfo;
-import com.iit.concurrentProgramming.Coursework.TicketMachineSettings.SystemOutputs;
+
+import com.iit.concurrentProgramming.Coursework.technician.TicketTechnician;
+import com.iit.concurrentProgramming.Coursework.ticket_info.PassengerInfo;
+import com.iit.concurrentProgramming.Coursework.technician.TonerTechnician;
+import com.iit.concurrentProgramming.Coursework.ticket_info.TravelInfo;
+import com.iit.concurrentProgramming.Coursework.ticket_machine.Passengers;
+import com.iit.concurrentProgramming.Coursework.ticket_machine.Ticket;
+import com.iit.concurrentProgramming.Coursework.ticket_machine.TicketMachine;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class TicketPrintingSystem extends SystemOutputs {
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.*;
+
+public class TicketPrintingSystem {
+
+    private static final List<Ticket> ticketList = getTickets();
     public static void main(String[] args) {
-        List<Ticket> ticketList = getTickets();
+
         ThreadGroup techniciansGroup = new ThreadGroup(TECHNICIAN_GROUP_NAME);
         ThreadGroup passengerGroup = new ThreadGroup(PASSENGER_GROUP_NAME);
 
-        TicketMachine ticketPrinter = new TicketMachine(5, 50);
+        TicketMachine ticketPrinter = new TicketMachine(10, 20, ticketList );
         List<Passengers> passengersList = new ArrayList<>();
-        for (int i = 0; i < ticketList.size(); i++) {
-            passengersList.add(new Passengers(ticketPrinter, ticketList.get(i)));
+        for (Ticket ticket : ticketList) {
+            passengersList.add(new Passengers(ticketPrinter, ticket));
         }
 
         TonerTechnician ticketTonerTechnician = new TonerTechnician(PAPER_TECH_NAME, ticketPrinter);
@@ -78,20 +88,19 @@ public class TicketPrintingSystem extends SystemOutputs {
                 }
             };
 
-            List<Ticket> ticketList = new ArrayList<>() {
+            return new ArrayList<>() {
                 {
-                   add(new Ticket(new BigDecimal("50.00"), "T123456", travelInfoList.get(0), passengerInfoList.get(0)));
-                   add(new Ticket(new BigDecimal("65.00"), "T789012", travelInfoList.get(1), passengerInfoList.get(1)));
-                   add(new Ticket(new BigDecimal("45.50"), "T345678", travelInfoList.get(2), passengerInfoList.get(2)));
-                   add(new Ticket(new BigDecimal("75.25"), "T901234", travelInfoList.get(3), passengerInfoList.get(3)));
-                   add(new Ticket(new BigDecimal("60.75"), "T567890", travelInfoList.get(4), passengerInfoList.get(4)));
-                   add(new Ticket(new BigDecimal("55.50"), "T234567", travelInfoList.get(5), passengerInfoList.get(5)));
-                   add(new Ticket(new BigDecimal("80.00"), "T890123", travelInfoList.get(6), passengerInfoList.get(6)));
-                   add(new Ticket(new BigDecimal("70.25"), "T456789", travelInfoList.get(7), passengerInfoList.get(7)));
-                   add(new Ticket(new BigDecimal("48.90"), "T012345", travelInfoList.get(8), passengerInfoList.get(8)));
-                   add(new Ticket(new BigDecimal("62.50"), "T678901", travelInfoList.get(9), passengerInfoList.get(9)));
+                   add(new Ticket(new BigDecimal("50.00"), UUID.randomUUID(), travelInfoList.get(0), passengerInfoList.get(0)));
+                   add(new Ticket(new BigDecimal("65.00"), UUID.randomUUID(), travelInfoList.get(1), passengerInfoList.get(1)));
+                   add(new Ticket(new BigDecimal("45.50"), UUID.randomUUID(), travelInfoList.get(2), passengerInfoList.get(2)));
+                   add(new Ticket(new BigDecimal("75.25"), UUID.randomUUID(), travelInfoList.get(3), passengerInfoList.get(3)));
+                   add(new Ticket(new BigDecimal("60.75"), UUID.randomUUID(), travelInfoList.get(4), passengerInfoList.get(4)));
+                   add(new Ticket(new BigDecimal("55.50"), UUID.randomUUID(), travelInfoList.get(5), passengerInfoList.get(5)));
+                   add(new Ticket(new BigDecimal("80.00"), UUID.randomUUID(), travelInfoList.get(6), passengerInfoList.get(6)));
+                   add(new Ticket(new BigDecimal("70.25"), UUID.randomUUID(), travelInfoList.get(7), passengerInfoList.get(7)));
+                   add(new Ticket(new BigDecimal("48.90"), UUID.randomUUID(), travelInfoList.get(8), passengerInfoList.get(8)));
+                   add(new Ticket(new BigDecimal("62.50"), UUID.randomUUID(), travelInfoList.get(9), passengerInfoList.get(9)));
                 }
             };
-            return ticketList;
         }
     }

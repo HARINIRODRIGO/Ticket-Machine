@@ -15,5 +15,8 @@
         </list>
       </option>
     </inspection_tool>
+    <inspection_tool class="JavadocDeclaration" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ADDITIONAL_TAGS" value="Author,Version,Since,Description:,Author:,Since:,Version:" />
+    </inspection_tool>
   </profile>
 </component>
