@@ -15,5 +15,4 @@
 <p>The Java implementation adheres to the Formal Methods Specification (FSP) model, emphasizing correctness and synchronization through the monitor pattern. The use of random sleep intervals adds a touch of realism to the simulation, enhancing the robustness of the system under diverse conditions.</p>
 <p>This README documentation provides a succinct overview of the Ticket-Machine Java implementation, facilitating understanding and utilization of the system in a concurrent environment.</p>
 <hr>
-<p><em>Note: This format is suitable for GitHub repositories to ensure proper rendering of headings and code snippets.</em></p>
 </div>
