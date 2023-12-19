@@ -33,8 +33,10 @@ public class TicketTechnician implements Technician {
     @Override
     public void run() {
         try {
-            Thread.sleep(Utils.getRandomTime() + PAPER_TECH_WAITING_TIME);
-            serviceMachine();
+            for (int count = 0; count <= PAPER_TECH_WAITING_TIME; count++) {
+                Thread.sleep(Utils.getRandomTime() + PAPER_TECH_WAITING_TIME);
+                serviceMachine();
+            }
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         }

@@ -1,6 +1,6 @@
 package com.iit.concurrentProgramming.Coursework.constants;
-
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Global.UTILITY_CLASS;
+
 
 /**
  * @Author Harini Rodrigo
@@ -43,14 +43,15 @@ public final class ConstantValues {
             }
 
             // Constants related to paper and toner levels and technician replacement counts.
-            public static final int SHEETS_PER_PACK = 50;
-            public static final int FULL_PAPER_TRAY = 60;
-            public static final int MAXIMUM_TONER_LEVEL = 50;
-            public static final int MINIMUM_TONER_LEVEL = 10;
+            public static final int SHEETS_PER_PACK = 5;
+            public static final int FULL_PAPER_TRAY = 10;
+            public static final int MAXIMUM_TONER_LEVEL = 30;
+            public static final int PAPER_PER_TICKET = 1;
+            public static final int MIN_TONER_LEVEL = 5;
             public static final int PAPER_TECH_MAX_REPLACE_COUNT = 3;
             public static final int TONER_TECH_MAX_REFILL_COUNT = 3;
-            public static final int PAPER_TECH_WAITING_TIME = 5000;
-            public static final int TONER_TECH_WAITING_TIME = 5000;
+            public static final int PAPER_TECH_WAITING_TIME = 1000;
+            public static final int TONER_TECH_WAITING_TIME = 1000;
             public static String newTicket = """
 
                     --------------------- TICKET ----------------------

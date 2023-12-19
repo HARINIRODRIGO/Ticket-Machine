@@ -33,8 +33,11 @@ public class TonerTechnician implements Technician {
     @Override
     public void run() {
         try {
-            Thread.sleep(Utils.getRandomTime() + TONER_TECH_WAITING_TIME);
-            serviceMachine();
+            for (int count = 0; count <= TONER_TECH_WAITING_TIME; count++) {
+                Thread.sleep(Utils.getRandomTime() + TONER_TECH_WAITING_TIME);
+                serviceMachine();
+            }
+
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         }

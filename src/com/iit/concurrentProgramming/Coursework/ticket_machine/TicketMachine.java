@@ -27,19 +27,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class TicketMachine implements ServiceTicketMachine, Printer {
     @lombok.NonNull
-    private int currentPaperLevel, currentTonerLevel;
+    private int currentPaperLevel = 0;
+    private int  currentTonerLevel = 0 ;
+    private int tonerRefillCount = 0;
+    private int paperRefillCount = 0;
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition tonerAvailability = lock.newCondition();
     private final Condition paperAvailability = lock.newCondition();
     private final Condition resourceAvailability = lock.newCondition();
     public static ArrayList<Ticket> passengers = new ArrayList<>();
-    private int tonerRefillCount = 0;
-    private int paperRefillCount = 0;
 
-
-    public TicketMachine(int currentPaperLevel, int currentTonerLevel, List<Ticket> passengers) {
-        this.currentPaperLevel = currentPaperLevel;
-        this.currentTonerLevel = currentTonerLevel;
+    public TicketMachine(List<Ticket> passengers) {
         passengerQueue(passengers);
     }
 
@@ -52,11 +50,11 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
      * "PRINTABLE": if both paper and toner are sufficient.<br>
      */
     private String isResourceAvailable() {
-        if (currentPaperLevel <= 0 & currentTonerLevel <= MINIMUM_TONER_LEVEL) {
+        if (currentPaperLevel < PAPER_PER_TICKET & currentTonerLevel < MIN_TONER_LEVEL) {
             return INSUFFICIENT_TONER_AND_PAPER;
-        } else if (currentPaperLevel <= 0) {
+        } else if (currentPaperLevel < PAPER_PER_TICKET) {
             return INSUFFICIENT_PAPER;
-        } else if (currentTonerLevel <= MINIMUM_TONER_LEVEL) {
+        } else if (currentTonerLevel < MIN_TONER_LEVEL) {
             return INSUFFICIENT_TONER;
         }
         return PRINTABLE;
@@ -77,11 +75,19 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
             lock.lock();
 
             while (!isResourceAvailable().equals(PRINTABLE)) {
+
                 if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + NO_PASSENGERS_MSG + ANSI_RESET);
                     return;
+                } else if (currentPaperLevel < PAPER_PER_TICKET && paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT) {
+                    System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
+                    break;
+                } else if (currentTonerLevel < MIN_TONER_LEVEL & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
+                    System.out.println(ANSI_RED + TONER_REFILL_SKIP_MSG + ANSI_RESET);
+                    break;
+                } else{
+                    resourceAvailability.await();
                 }
-                resourceAvailability.await();
             }
             if (!passengers.isEmpty()) {
                 this.currentTonerLevel--;
@@ -90,7 +96,6 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                 passengers.remove(ticket);
                 paperAvailability.signalAll();
                 tonerAvailability.signalAll();
-                resourceAvailability.signalAll();
             }
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + TICKET_PRINTING_THREAD_INTERRUPTED_MSG + ANSI_RESET);
@@ -122,17 +127,15 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                     paperAvailability.await();
                 }
             }
-            if (!passengers.isEmpty() & currentPaperLevel == 0) {
+            if (!passengers.isEmpty() & currentPaperLevel < PAPER_PER_TICKET) {
                 System.out.println(ANSI_YELLOW + REFILL_WAITING + ANSI_RESET);
                 currentPaperLevel += SHEETS_PER_PACK;
                 System.out.println(ANSI_PURPLE + REFILL_COMPLETE_MSG + ANSI_RESET);
                 paperRefillCount++;
-                paperAvailability.signalAll();
+                resourceAvailability.signalAll();
                 System.out.println(ANSI_BLUE + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
             }
-            if (!passengers.isEmpty() & paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT) {
-                System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
-            }
+
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         } finally {
@@ -154,7 +157,7 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
 
         try {
             lock.lock();
-            while (currentTonerLevel + MINIMUM_TONER_LEVEL >= MAXIMUM_TONER_LEVEL) {
+            while (currentTonerLevel >= MAXIMUM_TONER_LEVEL) {
                 if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + TONER_REPLACE_SKIP_MSG + ANSI_RESET);
                     break;
@@ -163,17 +166,15 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                     tonerAvailability.await();
                 }
             }
-            if (!passengers.isEmpty()) {
+            if (!passengers.isEmpty() & currentTonerLevel < MIN_TONER_LEVEL){
                 System.out.println(ANSI_YELLOW + REFILL_WAITING + ANSI_RESET);
-                currentTonerLevel += MINIMUM_TONER_LEVEL;
+                currentTonerLevel += MAXIMUM_TONER_LEVEL;
                 System.out.println(ANSI_PURPLE + TONER_REPLACED_MSG + ANSI_RESET);
                 tonerRefillCount++;
                 System.out.println(ANSI_BLUE + TONER_LEVEL_MSG + currentTonerLevel + ANSI_RESET);
-                tonerAvailability.signalAll();
+                resourceAvailability.signalAll();
             }
-            if (!TicketMachine.passengers.isEmpty() & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
-                System.out.println(ANSI_RED + TONER_REFILL_SKIP_MSG + ANSI_RESET);
-            }
+
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         } finally {

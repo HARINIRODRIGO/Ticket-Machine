@@ -39,7 +39,7 @@ public class TicketPrintingSystem {
         ThreadGroup techniciansGroup = new ThreadGroup(TECHNICIAN_GROUP_NAME);
         ThreadGroup passengerGroup = new ThreadGroup(PASSENGER_GROUP_NAME);
 
-        TicketMachine ticketPrinter = new TicketMachine(10, 20, ticketList);
+        TicketMachine ticketPrinter = new TicketMachine( ticketList);
         List<Passengers> passengersList = new ArrayList<>();
         for (Ticket ticket : ticketList) {
             passengersList.add(new Passengers(ticketPrinter, ticket));
@@ -115,6 +115,7 @@ public class TicketPrintingSystem {
                 add(new Ticket(new BigDecimal("70.25"), UUID.randomUUID(), travelInfoList.get(7), passengerInfoList.get(7)));
                 add(new Ticket(new BigDecimal("48.90"), UUID.randomUUID(), travelInfoList.get(8), passengerInfoList.get(8)));
                 add(new Ticket(new BigDecimal("62.50"), UUID.randomUUID(), travelInfoList.get(9), passengerInfoList.get(9)));
+
             }
         };
     }
