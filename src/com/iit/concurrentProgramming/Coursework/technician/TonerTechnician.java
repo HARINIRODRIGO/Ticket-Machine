@@ -5,6 +5,7 @@ import com.iit.concurrentProgramming.Coursework.ticket_machine.ServiceTicketMach
 
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG;
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.TONER_TECH_MAX_REFILL_COUNT;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.TONER_TECH_WAITING_TIME;
 
 /**
@@ -33,7 +34,7 @@ public class TonerTechnician implements Technician {
     @Override
     public void run() {
         try {
-            for (int count = 0; count <= TONER_TECH_WAITING_TIME; count++) {
+            for (int count = 0; count < TONER_TECH_MAX_REFILL_COUNT; count++) {
                 Thread.sleep(Utils.getRandomTime() + TONER_TECH_WAITING_TIME);
                 serviceMachine();
             }

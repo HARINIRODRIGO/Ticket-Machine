@@ -26,9 +26,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class TicketMachine implements ServiceTicketMachine, Printer {
-    @lombok.NonNull
+
     private int currentPaperLevel = 0;
-    private int  currentTonerLevel = 0 ;
+    private int currentTonerLevel = 0;
     private int tonerRefillCount = 0;
     private int paperRefillCount = 0;
     private final ReentrantLock lock = new ReentrantLock();
@@ -50,11 +50,11 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
      * "PRINTABLE": if both paper and toner are sufficient.<br>
      */
     private String isResourceAvailable() {
-        if (currentPaperLevel < PAPER_PER_TICKET & currentTonerLevel < MIN_TONER_LEVEL) {
+        if (currentPaperLevel < MIN_PAPER_LEVEL & currentTonerLevel < TONER_PER_TICKET) {
             return INSUFFICIENT_TONER_AND_PAPER;
-        } else if (currentPaperLevel < PAPER_PER_TICKET) {
+        } else if (currentPaperLevel < MIN_PAPER_LEVEL) {
             return INSUFFICIENT_PAPER;
-        } else if (currentTonerLevel < MIN_TONER_LEVEL) {
+        } else if (currentTonerLevel < TONER_PER_TICKET) {
             return INSUFFICIENT_TONER;
         }
         return PRINTABLE;
@@ -78,24 +78,25 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
 
                 if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + NO_PASSENGERS_MSG + ANSI_RESET);
-                    return;
-                } else if (currentPaperLevel < PAPER_PER_TICKET && paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT) {
+                    break;
+                } else if (paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT & currentPaperLevel < MIN_PAPER_LEVEL) {
                     System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
                     break;
-                } else if (currentTonerLevel < MIN_TONER_LEVEL & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
+                } else if (tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT & currentTonerLevel < TONER_PER_TICKET) {
                     System.out.println(ANSI_RED + TONER_REFILL_SKIP_MSG + ANSI_RESET);
                     break;
-                } else{
-                    resourceAvailability.await();
                 }
+                resourceAvailability.await();
             }
-            if (!passengers.isEmpty()) {
-                this.currentTonerLevel--;
-                this.currentPaperLevel--;
+
+            if (!passengers.isEmpty() & currentTonerLevel >= TONER_PER_TICKET & currentPaperLevel >= MIN_PAPER_LEVEL) {
+                this.currentTonerLevel -= TONER_PER_TICKET;
+                this.currentPaperLevel -= MIN_PAPER_LEVEL;
                 System.out.println(newTicket + ANSI_GREEN + ticket + ANSI_RESET);
                 passengers.remove(ticket);
                 paperAvailability.signalAll();
                 tonerAvailability.signalAll();
+                resourceAvailability.signalAll();
             }
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + TICKET_PRINTING_THREAD_INTERRUPTED_MSG + ANSI_RESET);
@@ -115,27 +116,30 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
     @Override
     public void refillPaper() {
         System.out.println(REFILL_TRY_MSG);
+
         try {
             lock.lock();
 
-            while ((currentPaperLevel + SHEETS_PER_PACK) >= FULL_PAPER_TRAY) {
+            while ((currentPaperLevel + SHEETS_PER_PACK) >= MAX_PAPERS) {
                 if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + PAPER_REPLACE_SKIP_MSG + ANSI_RESET);
                     break;
-                } else {
-                    System.out.println(ANSI_BLUE + SHEETS_IN_TRAY_MSG + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
-                    paperAvailability.await();
                 }
+                System.out.println(ANSI_BLUE + SHEETS_IN_TRAY_MSG + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
+                paperAvailability.await();
             }
-            if (!passengers.isEmpty() & currentPaperLevel < PAPER_PER_TICKET) {
+            if (!passengers.isEmpty() & currentPaperLevel < MIN_PAPER_LEVEL & !(paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT)) {
                 System.out.println(ANSI_YELLOW + REFILL_WAITING + ANSI_RESET);
                 currentPaperLevel += SHEETS_PER_PACK;
                 System.out.println(ANSI_PURPLE + REFILL_COMPLETE_MSG + ANSI_RESET);
                 paperRefillCount++;
+                paperAvailability.signalAll();
                 resourceAvailability.signalAll();
                 System.out.println(ANSI_BLUE + PAPER_LEVEL_MSG + currentPaperLevel + ANSI_RESET);
             }
-
+            if (currentPaperLevel < MIN_PAPER_LEVEL && paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT) {
+                System.out.println(ANSI_RED + PAPER_REFILL_SKIP_MSG + ANSI_RESET);
+            }
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         } finally {
@@ -157,7 +161,7 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
 
         try {
             lock.lock();
-            while (currentTonerLevel >= MAXIMUM_TONER_LEVEL) {
+            while (currentTonerLevel >= TONER_PER_TICKET) {
                 if (passengers.isEmpty()) {
                     System.out.println(ANSI_RED + TONER_REPLACE_SKIP_MSG + ANSI_RESET);
                     break;
@@ -166,13 +170,16 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                     tonerAvailability.await();
                 }
             }
-            if (!passengers.isEmpty() & currentTonerLevel < MIN_TONER_LEVEL){
+            if (currentTonerLevel < TONER_PER_TICKET & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
+                System.out.println(ANSI_RED + TONER_REFILL_SKIP_MSG + ANSI_RESET);
+            } else if (!passengers.isEmpty() & currentTonerLevel < TONER_PER_TICKET & !(tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT)) {
                 System.out.println(ANSI_YELLOW + REFILL_WAITING + ANSI_RESET);
                 currentTonerLevel += MAXIMUM_TONER_LEVEL;
                 System.out.println(ANSI_PURPLE + TONER_REPLACED_MSG + ANSI_RESET);
                 tonerRefillCount++;
-                System.out.println(ANSI_BLUE + TONER_LEVEL_MSG + currentTonerLevel + ANSI_RESET);
+                tonerAvailability.signalAll();
                 resourceAvailability.signalAll();
+                System.out.println(ANSI_BLUE + TONER_LEVEL_MSG + currentTonerLevel + ANSI_RESET);
             }
 
         } catch (InterruptedException e) {

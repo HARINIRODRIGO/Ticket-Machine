@@ -29,8 +29,8 @@ public final class ConstantValues {
             public static final String REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG = "Paper refill thread interrupted.";
             public static final String PASSENGER_THREAD_INTERRUPTED_MSG = "Passenger thread interrupted.";
             public static final String REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG = "Toner refill thread interrupted.";
-            public static final String PAPER_REFILL_SKIP_MSG = "Tickets require more paper but paper technician is unavailable. ";
-            public static final String TONER_REFILL_SKIP_MSG = "Tickets require more toner but toner technician is unavailable.";
+            public static final String PAPER_REFILL_SKIP_MSG = "Maximum paper refill count reached. Paper technician unavailable.";
+            public static final String TONER_REFILL_SKIP_MSG = "Maximum toner refill count reached. Toner technician unavailable.";
         }
 
         /**
@@ -43,11 +43,11 @@ public final class ConstantValues {
             }
 
             // Constants related to paper and toner levels and technician replacement counts.
-            public static final int SHEETS_PER_PACK = 5;
-            public static final int FULL_PAPER_TRAY = 10;
-            public static final int MAXIMUM_TONER_LEVEL = 30;
-            public static final int PAPER_PER_TICKET = 1;
-            public static final int MIN_TONER_LEVEL = 5;
+            public static final int SHEETS_PER_PACK = 8;
+            public static final int MAX_PAPERS = 10;
+            public static final int MAXIMUM_TONER_LEVEL = 10;
+            public static final int MIN_PAPER_LEVEL = 4;
+            public static final int TONER_PER_TICKET = 4;
             public static final int PAPER_TECH_MAX_REPLACE_COUNT = 3;
             public static final int TONER_TECH_MAX_REFILL_COUNT = 3;
             public static final int PAPER_TECH_WAITING_TIME = 1000;
@@ -89,7 +89,6 @@ public final class ConstantValues {
             // Print ticket messages.
             public static final String PRINTABLE = "Printable";
             public static final String TICKET_PRINTING_THREAD_INTERRUPTED_MSG = "Printing thread interrupted.";
-            public static final String FINISHED_PRINTING = "Finished Printing Tickets.";
             public static final String REFILL_WAITING = "Refilling in progress. ";
             public static final String NO_PASSENGERS_MSG = "No passengers waiting.";
 

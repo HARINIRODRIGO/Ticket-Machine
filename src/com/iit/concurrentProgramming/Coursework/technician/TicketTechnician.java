@@ -5,6 +5,7 @@ import com.iit.concurrentProgramming.Coursework.ticket_machine.ServiceTicketMach
 
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG;
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.PAPER_TECH_MAX_REPLACE_COUNT;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.PAPER_TECH_WAITING_TIME;
 
 /**
@@ -22,7 +23,6 @@ public class TicketTechnician implements Technician {
     @lombok.Getter
     private final String name;
     private final ServiceTicketMachine ticketMachine;
-
     /**
      * The run method, required by the Runnable interface, defines the paper replacement task.
      * The technician sleeps for a random interval, simulating the time taken for paper replacement,
@@ -33,7 +33,7 @@ public class TicketTechnician implements Technician {
     @Override
     public void run() {
         try {
-            for (int count = 0; count <= PAPER_TECH_WAITING_TIME; count++) {
+            for (int count = 0; count < PAPER_TECH_MAX_REPLACE_COUNT; count++) {
                 Thread.sleep(Utils.getRandomTime() + PAPER_TECH_WAITING_TIME);
                 serviceMachine();
             }

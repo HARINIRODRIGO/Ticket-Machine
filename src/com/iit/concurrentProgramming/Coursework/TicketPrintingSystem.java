@@ -62,14 +62,6 @@ public class TicketPrintingSystem {
 
         tonerTechnicianThread.start();
         paperTechnicianThread.start();
-
-
-        while (passengerGroup.activeCount() > 0 && techniciansGroup.activeCount() > 0) {
-            if (passengerGroup.activeCount() == 0) {
-                techniciansGroup.interrupt();
-                System.out.println(FINISHED_PRINTING);
-            }
-        }
     }
 
     public static List<Ticket> getTickets() {
