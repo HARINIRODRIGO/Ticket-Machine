@@ -1,7 +1,7 @@
 package com.iit.concurrentProgramming.Coursework.technician;
 
 import com.iit.concurrentProgramming.Coursework.constants.Utils;
-import com.iit.concurrentProgramming.Coursework.ticket_machine.ServiceTicketMachine;
+import com.iit.concurrentProgramming.Coursework.ticket_machine.TicketMachine;
 
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG;
@@ -22,7 +22,7 @@ import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.
 public class TicketTechnician implements Technician {
     @lombok.Getter
     private final String name;
-    private final ServiceTicketMachine ticketMachine;
+    private final TicketMachine ticketMachine;
     /**
      * The run method, required by the Runnable interface, defines the paper replacement task.
      * The technician sleeps for a random interval, simulating the time taken for paper replacement,

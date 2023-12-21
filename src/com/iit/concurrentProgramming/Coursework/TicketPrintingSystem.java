@@ -36,25 +36,24 @@ public class TicketPrintingSystem {
 
     public static void main(String[] args) {
 
-        ThreadGroup techniciansGroup = new ThreadGroup(TECHNICIAN_GROUP_NAME);
         ThreadGroup passengerGroup = new ThreadGroup(PASSENGER_GROUP_NAME);
+        ThreadGroup tonerTecGroup = new ThreadGroup(TONER_TEC_GROUP_NAME);
+        ThreadGroup paperTecGroup = new ThreadGroup(PAPER_TEC_GROUP_NAME);
+        TicketMachine ticketPrinter = new TicketMachine(ticketList, paperTecGroup, tonerTecGroup, passengerGroup);
+        TonerTechnician ticketTonerTechnician = new TonerTechnician(PAPER_TECH_NAME, ticketPrinter);
+        TicketTechnician ticketPaperTechnician = new TicketTechnician(TONER_TECH_NAME, ticketPrinter);
 
-        TicketMachine ticketPrinter = new TicketMachine( ticketList);
         List<Passengers> passengersList = new ArrayList<>();
         for (Ticket ticket : ticketList) {
             passengersList.add(new Passengers(ticketPrinter, ticket));
         }
-
-        TonerTechnician ticketTonerTechnician = new TonerTechnician(PAPER_TECH_NAME, ticketPrinter);
-        TicketTechnician ticketPaperTechnician = new TicketTechnician(TONER_TECH_NAME, ticketPrinter);
-
         List<Thread> passengerThreads = new ArrayList<>();
         for (int i = 0; i < passengersList.size(); i++) {
             passengerThreads.add(new Thread(passengerGroup, passengersList.get(i), ticketList.get(i).getPassengerInfo().getName()));
         }
 
-        Thread tonerTechnicianThread = new Thread(techniciansGroup, ticketTonerTechnician, TONER_TECH_THREADS_NAME);
-        Thread paperTechnicianThread = new Thread(techniciansGroup, ticketPaperTechnician, PAPER_TECH_THREADS_NAME);
+        Thread tonerTechnicianThread = new Thread(tonerTecGroup, ticketTonerTechnician, TONER_TECH_THREADS_NAME);
+        Thread paperTechnicianThread = new Thread(paperTecGroup, ticketPaperTechnician, PAPER_TECH_THREADS_NAME);
 
         for (Thread thread : passengerThreads) {
             thread.start();
@@ -67,15 +66,15 @@ public class TicketPrintingSystem {
     public static List<Ticket> getTickets() {
         List<PassengerInfo> passengerInfoList = new ArrayList<>() {
             {
-                add(new PassengerInfo("John", "0771234567", "male", "0717894566", "john@gmail.com"));
-                add(new PassengerInfo("Alice", "0772345678", "female", "0718765432", "alice@gmail.com"));
-                add(new PassengerInfo("Bob", "0773456789", "male", "0719876543", "bob@gmail.com"));
-                add(new PassengerInfo("Eva", "0774567890", "female", "0717654321", "eva@gmail.com"));
-                add(new PassengerInfo("Michael", "0775678901", "male", "0716543210", "michael@gmail.com"));
-                add(new PassengerInfo("Sophia", "0776789012", "female", "0715432109", "sophia@gmail.com"));
-                add(new PassengerInfo("Daniel", "0777890123", "male", "0714321098", "daniel@gmail.com"));
-                add(new PassengerInfo("Emma", "0778901234", "female", "0713210987", "emma@gmail.com"));
-                add(new PassengerInfo("William", "0779012345", "male", "0712109876", "william@gmail.com"));
+                add(new PassengerInfo("John", "12787987888V", "male", "0717894566", "john@gmail.com"));
+                add(new PassengerInfo("Alice", "1548787445V", "female", "0718765432", "alice@gmail.com"));
+                add(new PassengerInfo("Bob", "15447897445V", "male", "0719876543", "bob@gmail.com"));
+                add(new PassengerInfo("Eva", "1548787445V", "female", "0717654321", "eva@gmail.com"));
+                add(new PassengerInfo("Michael", "1548787445V", "male", "0716543210", "michael@gmail.com"));
+                add(new PassengerInfo("Sophia", "14878791548V", "female", "0715432109", "sophia@gmail.com"));
+                add(new PassengerInfo("Daniel", "4878721364V", "male", "0714321098", "daniel@gmail.com"));
+                add(new PassengerInfo("Emma", "78645314681V", "female", "0713210987", "emma@gmail.com"));
+                add(new PassengerInfo("William", "487741478784V", "male", "0712109876", "william@gmail.com"));
                 add(new PassengerInfo("Olivia", "0770123456", "female", "0710987654", "olivia@gmail.com"));
             }
         };

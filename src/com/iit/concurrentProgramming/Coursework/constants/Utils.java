@@ -17,6 +17,6 @@ public class Utils {
      */
     public static int getRandomTime() {
         Random rand = new Random();
-        return (rand.nextInt(10) + 1) * 1000;
+        return (rand.nextInt(10) + 1) * 500;
     }
 }

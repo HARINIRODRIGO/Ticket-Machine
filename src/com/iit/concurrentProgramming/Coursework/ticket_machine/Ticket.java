@@ -30,9 +30,9 @@ public class Ticket {
      */
     @Override
     public String toString() {
-        return "Passenger Name = " + passengerInfo.getName() + '\n' +
-                "TicketNumber = " + ticketNumber + '\n' +
-                "TicketPrice = " + ticketPrice + '\n' +
-                "Travel = " + travelInfo.getOrigin() + " to " + travelInfo.getDestination();
+        return "[ Passenger Name = " + passengerInfo.getName()  +
+                "] "+" Passenger Info => "+ passengerInfo +" Ticket Info =>" +" TicketNumber = " + ticketNumber  +
+                ", TicketPrice = " + ticketPrice +
+                ", Travel = " + travelInfo.getOrigin() + " to " + travelInfo.getDestination();
     }
 }

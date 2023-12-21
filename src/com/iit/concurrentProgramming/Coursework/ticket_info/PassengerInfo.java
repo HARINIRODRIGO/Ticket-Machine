@@ -7,7 +7,6 @@ package com.iit.concurrentProgramming.Coursework.ticket_info;
  * @Description: This class is used to store the passenger information.
  */
 @lombok.Getter
-@lombok.ToString
 @lombok.AllArgsConstructor
 public class PassengerInfo {
     private String name;
@@ -15,4 +14,13 @@ public class PassengerInfo {
     private String gender;
     private String phoneNumber;
     private String email;
+
+    @Override
+    public String toString() {
+        return  "name='" + name + '\'' +
+                ", ID Number='" + IDNumber + '\'' +
+                ", gender='" + gender + '\'' +
+                ", phone Number='" + phoneNumber + '\'' +
+                ", email='" + email;
+    }
 }
