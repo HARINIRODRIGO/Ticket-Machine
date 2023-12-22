@@ -58,11 +58,11 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
      * "PRINTABLE": if both paper and toner are sufficient.<br>
      */
     private String isResourceAvailable() {
-        if (currentPaperLevel < MIN_PAPER_LEVEL & currentTonerLevel < TONER_PER_TICKET) {
+        if (currentPaperLevel < MIN_PAPER_LEVEL & currentTonerLevel < MIN_TONER_LEVEL) {
             return INSUFFICIENT_TONER_AND_PAPER;
         } else if (currentPaperLevel < MIN_PAPER_LEVEL) {
             return INSUFFICIENT_PAPER;
-        } else if (currentTonerLevel < TONER_PER_TICKET) {
+        } else if (currentTonerLevel < MIN_TONER_LEVEL) {
             return INSUFFICIENT_TONER;
         }
         return PRINTABLE;
@@ -83,21 +83,20 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
             lock.lock();
 
             while (!isResourceAvailable().equals(PRINTABLE)) {
-
                 if (passengers.isEmpty()) {
                     threadErrorMessage(NO_PASSENGERS_MSG,true);
                     break;
                 } else if (paperRefillCount == PAPER_TECH_MAX_REPLACE_COUNT & currentPaperLevel < MIN_PAPER_LEVEL) {
                     threadErrorMessage(PAPER_REFILL_SKIP_MSG,true);
                     break;
-                } else if (tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT & currentTonerLevel < TONER_PER_TICKET) {
+                } else if (tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT & currentTonerLevel < MIN_TONER_LEVEL) {
                     threadErrorMessage(TONER_REFILL_SKIP_MSG,true);
                     break;
                 }
                 resourceAvailability.await();
             }
 
-            if (!passengers.isEmpty() & currentTonerLevel >= TONER_PER_TICKET & currentPaperLevel >= MIN_PAPER_LEVEL) {
+            if (!passengers.isEmpty() & currentTonerLevel >= MIN_TONER_LEVEL & currentPaperLevel >= MIN_PAPER_LEVEL) {
                 this.currentTonerLevel -= TONER_PER_TICKET;
                 this.currentPaperLevel -= MIN_PAPER_LEVEL;
                 System.out.println(ANSI_GREEN + ticket + ANSI_RESET);
@@ -166,7 +165,7 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
 
         try {
             lock.lock();
-            while (currentTonerLevel >= TONER_PER_TICKET) {
+            while (currentTonerLevel >= MIN_TONER_LEVEL) {
                 if (passengers.isEmpty()) {
                     threadErrorMessage(TONER_REPLACE_SKIP_MSG,true);
                     break;
@@ -175,9 +174,9 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                     tonerAvailability.await();
                 }
             }
-            if (currentTonerLevel < TONER_PER_TICKET & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
+            if (currentTonerLevel < MIN_TONER_LEVEL & tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT) {
                 threadErrorMessage(TONER_REFILL_SKIP_MSG,true);
-            } else if (!passengers.isEmpty() & currentTonerLevel < TONER_PER_TICKET & !(tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT)) {
+            } else if (!passengers.isEmpty() & currentTonerLevel < MIN_TONER_LEVEL & !(tonerRefillCount == TONER_TECH_MAX_REFILL_COUNT)) {
                 System.out.println(TONER_REFILLING);
                 currentTonerLevel += MAXIMUM_TONER_LEVEL;
                 tonerRefillCount++;

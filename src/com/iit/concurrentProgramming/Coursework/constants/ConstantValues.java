@@ -46,8 +46,9 @@ public final class ConstantValues {
             public static final int SHEETS_PER_PACK = 8;
             public static final int MAX_PAPERS = 10;
             public static final int MAXIMUM_TONER_LEVEL = 10;
-            public static final int MIN_PAPER_LEVEL = 4;
-            public static final int TONER_PER_TICKET = 4;
+            public static final int MIN_PAPER_LEVEL = 1;
+            public static final int MIN_TONER_LEVEL = 5;
+            public static final int TONER_PER_TICKET = 1;
             public static final int PAPER_TECH_MAX_REPLACE_COUNT = 3;
             public static final int TONER_TECH_MAX_REFILL_COUNT = 3;
             public static final int PAPER_TECH_WAITING_TIME = 1000;
