@@ -39,7 +39,7 @@ public class TicketPrintingSystem {
         ThreadGroup passengerGroup = new ThreadGroup(PASSENGER_GROUP_NAME);
         ThreadGroup tonerTecGroup = new ThreadGroup(TONER_TEC_GROUP_NAME);
         ThreadGroup paperTecGroup = new ThreadGroup(PAPER_TEC_GROUP_NAME);
-        TicketMachine ticketPrinter = new TicketMachine(ticketList, paperTecGroup, tonerTecGroup, passengerGroup);
+        TicketMachine ticketPrinter = new TicketMachine(ticketList, paperTecGroup, tonerTecGroup);
         TonerTechnician ticketTonerTechnician = new TonerTechnician(PAPER_TECH_NAME, ticketPrinter);
         TicketTechnician ticketPaperTechnician = new TicketTechnician(TONER_TECH_NAME, ticketPrinter);
 
@@ -52,15 +52,18 @@ public class TicketPrintingSystem {
             passengerThreads.add(new Thread(passengerGroup, passengersList.get(i), ticketList.get(i).getPassengerInfo().getName()));
         }
 
-        Thread tonerTechnicianThread = new Thread(tonerTecGroup, ticketTonerTechnician, TONER_TECH_THREADS_NAME);
-        Thread paperTechnicianThread = new Thread(paperTecGroup, ticketPaperTechnician, PAPER_TECH_THREADS_NAME);
-
+        Thread tonerTechnicianThread1 = new Thread(tonerTecGroup, ticketTonerTechnician, TONER_TECH_THREADS_NAME);
+        Thread paperTechnicianThread1 = new Thread(paperTecGroup, ticketPaperTechnician, PAPER_TECH_THREADS_NAME);
+        Thread tonerTechnicianThread2 = new Thread(tonerTecGroup, ticketTonerTechnician, TONER_TECH_THREADS_NAME);
+        Thread paperTechnicianThread2 = new Thread(paperTecGroup, ticketPaperTechnician, PAPER_TECH_THREADS_NAME);
         for (Thread thread : passengerThreads) {
             thread.start();
         }
 
-        tonerTechnicianThread.start();
-        paperTechnicianThread.start();
+        tonerTechnicianThread1.start();
+        paperTechnicianThread1.start();
+        paperTechnicianThread2.start();
+       // tonerTechnicianThread2.start();
     }
 
     public static List<Ticket> getTickets() {
