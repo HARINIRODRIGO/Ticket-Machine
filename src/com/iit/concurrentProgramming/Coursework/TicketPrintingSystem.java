@@ -62,7 +62,7 @@ public class TicketPrintingSystem {
 
         tonerTechnicianThread1.start();
         paperTechnicianThread1.start();
-        paperTechnicianThread2.start();
+        //paperTechnicianThread2.start();
        // tonerTechnicianThread2.start();
     }
 

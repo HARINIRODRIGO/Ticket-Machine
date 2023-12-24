@@ -84,12 +84,10 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
                     threadErrorMessage(NO_PASSENGERS_MSG,true);
                     break;
                 }
-                else if(isResourceAvailable().equals(INSUFFICIENT_PAPER)) {
-
-                    if(noPaperTechs()){ threadErrorMessage(PAPER_REFILL_SKIP_MSG,true);
+                else if(isResourceAvailable().equals(INSUFFICIENT_PAPER) & noPaperTechs()){ threadErrorMessage(PAPER_REFILL_SKIP_MSG,true);
                         break;
                     }
-                } else if (isResourceAvailable().equals(INSUFFICIENT_TONER) & noTonerTechs()) {
+                else if (isResourceAvailable().equals(INSUFFICIENT_TONER) & noTonerTechs()) {
                         threadErrorMessage(TONER_REFILL_SKIP_MSG,true);
                         break;
                 }

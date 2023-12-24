@@ -1,7 +1,10 @@
 package com.iit.concurrentProgramming.Coursework.ticket_machine;
 
+import com.iit.concurrentProgramming.Coursework.constants.Utils;
+
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.PASSENGER_THREAD_INTERRUPTED_MSG;
+import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.PAPER_TECH_WAITING_TIME;
 
 /**
  * @Author: Harini Rodrigo
@@ -23,7 +26,7 @@ public class Passengers implements Runnable {
     public void run() {
         try {
             ticketMachine.printTicket(ticket);
-            Thread.sleep(1000);
+            Thread.sleep(Utils.getRandomTime() + PAPER_TECH_WAITING_TIME);
         } catch (InterruptedException e) {
             System.out.println(ANSI_RED + PASSENGER_THREAD_INTERRUPTED_MSG + ANSI_RESET);
         }
