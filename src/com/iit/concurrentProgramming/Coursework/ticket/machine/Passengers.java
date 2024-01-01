@@ -1,4 +1,4 @@
-package com.iit.concurrentProgramming.Coursework.ticket_machine;
+package com.iit.concurrentProgramming.Coursework.ticket.machine;
 
 import com.iit.concurrentProgramming.Coursework.constants.Utils;
 

@@ -1,4 +1,4 @@
-package com.iit.concurrentProgramming.Coursework.ticket_machine;
+package com.iit.concurrentProgramming.Coursework.ticket.machine;
 
 /**
  * The `Printer` interface defines the contract for a printer that is responsible for printing tickets.

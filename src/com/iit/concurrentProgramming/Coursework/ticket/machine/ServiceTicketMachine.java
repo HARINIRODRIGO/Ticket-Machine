@@ -1,4 +1,4 @@
-package com.iit.concurrentProgramming.Coursework.ticket_machine;
+package com.iit.concurrentProgramming.Coursework.ticket.machine;
 
 /**
  * The `ServiceTicketMachine` interface defines the contract for a concurrent ticket printing machine.

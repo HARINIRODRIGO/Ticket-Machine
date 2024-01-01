@@ -3,12 +3,12 @@ package com.iit.concurrentProgramming.Coursework;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.*;
 
 import com.iit.concurrentProgramming.Coursework.technician.TicketTechnician;
-import com.iit.concurrentProgramming.Coursework.ticket_info.PassengerInfo;
+import com.iit.concurrentProgramming.Coursework.ticket.info.PassengerInfo;
 import com.iit.concurrentProgramming.Coursework.technician.TonerTechnician;
-import com.iit.concurrentProgramming.Coursework.ticket_info.TravelInfo;
-import com.iit.concurrentProgramming.Coursework.ticket_machine.Passengers;
-import com.iit.concurrentProgramming.Coursework.ticket_machine.Ticket;
-import com.iit.concurrentProgramming.Coursework.ticket_machine.TicketMachine;
+import com.iit.concurrentProgramming.Coursework.ticket.info.TravelInfo;
+import com.iit.concurrentProgramming.Coursework.ticket.machine.Passengers;
+import com.iit.concurrentProgramming.Coursework.ticket.machine.Ticket;
+import com.iit.concurrentProgramming.Coursework.ticket.machine.TicketMachine;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -63,7 +63,7 @@ public class TicketPrintingSystem {
         tonerTechnicianThread1.start();
         paperTechnicianThread1.start();
         //paperTechnicianThread2.start();
-       // tonerTechnicianThread2.start();
+        //tonerTechnicianThread2.start();
     }
 
     public static List<Ticket> getTickets() {

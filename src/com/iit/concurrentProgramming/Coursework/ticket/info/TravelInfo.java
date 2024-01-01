@@ -1,4 +1,4 @@
-package com.iit.concurrentProgramming.Coursework.ticket_info;
+package com.iit.concurrentProgramming.Coursework.ticket.info;
 
 import java.util.Date;
 

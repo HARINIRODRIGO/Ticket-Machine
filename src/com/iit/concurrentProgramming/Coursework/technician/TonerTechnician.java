@@ -1,7 +1,7 @@
 package com.iit.concurrentProgramming.Coursework.technician;
 
 import com.iit.concurrentProgramming.Coursework.constants.Utils;
-import com.iit.concurrentProgramming.Coursework.ticket_machine.TicketMachine;
+import com.iit.concurrentProgramming.Coursework.ticket.machine.TicketMachine;
 
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG;

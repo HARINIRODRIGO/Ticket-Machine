@@ -1,10 +1,11 @@
-package com.iit.concurrentProgramming.Coursework.ticket_machine;
+package com.iit.concurrentProgramming.Coursework.ticket.machine;
 
 
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.Colors.ANSI_RESET;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.ErrorMessage.*;
 import static com.iit.concurrentProgramming.Coursework.constants.ConstantValues.Constants.TicketMachine.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +56,9 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
      * "PRINTABLE": if both paper and toner are sufficient.<br>
      */
     private String isResourceAvailable() {
-        if (currentPaperLevel < MIN_PAPER_LEVEL & currentTonerLevel < MIN_TONER_LEVEL) {
+        if (currentPaperLevel < PAPERS_PER_TICKET & currentTonerLevel < MIN_TONER_LEVEL) {
             return INSUFFICIENT_TONER_AND_PAPER;
-        } else if (currentPaperLevel < MIN_PAPER_LEVEL) {
+        } else if (currentPaperLevel < PAPERS_PER_TICKET) {
             return INSUFFICIENT_PAPER;
         } else if (currentTonerLevel < MIN_TONER_LEVEL) {
             return INSUFFICIENT_TONER;
@@ -80,32 +81,37 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
             lock.lock();
 
             while (!isResourceAvailable().equals(PRINTABLE)) {
+
                 if (passengers.isEmpty()) {
-                    threadErrorMessage(NO_PASSENGERS_MSG,true);
+                    System.out.println(threadMessages(NO_PASSENGERS_MSG,"Error"));
                     break;
                 }
-                else if(isResourceAvailable().equals(INSUFFICIENT_PAPER) & noPaperTechs()){ threadErrorMessage(PAPER_REFILL_SKIP_MSG,true);
+                else if(isResourceAvailable().equals(INSUFFICIENT_PAPER) & noPaperTechs()){
+                        System.out.println(threadMessages(PAPER_REFILL_SKIP_MSG,"Error"));
                         break;
                     }
                 else if (isResourceAvailable().equals(INSUFFICIENT_TONER) & noTonerTechs()) {
-                        threadErrorMessage(TONER_REFILL_SKIP_MSG,true);
-                        break;
+                    System.out.println(threadMessages(TONER_REFILL_SKIP_MSG,"Error"));
+                    break;
                 }
-                resourceAvailability.await();
+                resourceAvailability.await(1000, MILLISECONDS);
             }
 
-            if (!passengers.isEmpty() & currentTonerLevel >= MIN_TONER_LEVEL & currentPaperLevel >= MIN_PAPER_LEVEL) {
-                this.currentTonerLevel -= TONER_PER_TICKET;
-                this.currentPaperLevel -= MIN_PAPER_LEVEL;
-                System.out.println(ANSI_GREEN + ticket + ANSI_RESET);
+            /*
+                * Assuming only one paper and a toner will use when printing a ticket
+             */
+            if (!passengers.isEmpty() & currentTonerLevel >= TONERS_PER_TICKET & currentPaperLevel >= PAPERS_PER_TICKET) {
+                this.currentTonerLevel -= TONERS_PER_TICKET;
+                this.currentPaperLevel -= PAPERS_PER_TICKET;
+                System.out.println(threadMessages(ticket.toString(),"Print Ticket"));
                 passengers.remove(ticket);
                 paperAvailability.signalAll();
                 tonerAvailability.signalAll();
                 resourceAvailability.signalAll();
+                System.out.println(threadMessages(PRINTING_TICKET_MSG,"Success"));
             }
         } catch (InterruptedException e) {
-            threadErrorMessage(TICKET_PRINTING_THREAD_INTERRUPTED_MSG ,true);
-
+            System.out.println(threadMessages(TICKET_PRINTING_THREAD_INTERRUPTED_MSG,"Warning"));
         } finally {
             lock.unlock();
         }
@@ -126,27 +132,27 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
 
             while ((currentPaperLevel + SHEETS_PER_PACK) >= MAX_PAPERS) {
                 if (passengers.isEmpty()) {
-                    threadErrorMessage(PAPER_REPLACE_SKIP_MSG,true);
+                    System.out.println(threadMessages(PAPER_REPLACE_SKIP_MSG,"Warning"));
                     break;
-                }else if(noTonerTechs() & currentTonerLevel < MIN_TONER_LEVEL){
-                    threadErrorMessage(PAPER_REPLACE_SKIP_MSG,true);
+                }else if(noTonerTechs() & currentTonerLevel < TONERS_PER_TICKET){
+                    System.out.println(threadMessages(IMPOSSIBLE_PAPER_REFILLING,"Error"));
                     break;
                 }
                 else {
-                    tecThreadMessages(SHEETS_IN_TRAY_MSG);
-                    paperAvailability.await();
+                    System.out.println(threadMessages(SHEETS_IN_TRAY_MSG,"Info"));
+                    paperAvailability.await(1000, MILLISECONDS);
                 }
             }
-            if (!passengers.isEmpty() & currentPaperLevel < MIN_PAPER_LEVEL & !noPaperTechs() ) {
-                System.out.println(PAPER_REFILLING );
+            if (!passengers.isEmpty() & currentPaperLevel < PAPERS_PER_TICKET & !noPaperTechs() ) {
+                System.out.println(ANSI_RESET +PAPER_REFILLING + ANSI_RESET);
                 currentPaperLevel += SHEETS_PER_PACK;
                 paperRefillCount++;
                 paperAvailability.signalAll();
                 resourceAvailability.signalAll();
-                tecThreadMessages((PAPER_REPLACED_MSG));
+                System.out.println(threadMessages(PAPER_REPLACED_MSG,"Success"));
             }
         } catch (InterruptedException e) {
-            threadErrorMessage(REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG,true);
+            System.out.println(threadMessages(REFILL_TICKET_TECH_THREAD_INTERRUPTED_MSG,"Warning"));
         } finally {
             lock.unlock();
         }
@@ -167,27 +173,26 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
             lock.lock();
             while (currentTonerLevel >= MIN_TONER_LEVEL) {
                 if (passengers.isEmpty()) {
-                    threadErrorMessage(TONER_REPLACE_SKIP_MSG,true);
+                    System.out.println(threadMessages(TONER_REPLACE_SKIP_MSG,"Warning"));
                     break;
-                } else if (noPaperTechs() & currentPaperLevel < MIN_PAPER_LEVEL){
-                    threadErrorMessage(TONER_REPLACE_SKIP_MSG,true);
+                } else if (noPaperTechs() & currentPaperLevel < PAPERS_PER_TICKET){
+                    System.out.println(threadMessages(IMPOSSIBLE_TONER_REFILLING,"Error"));
                     break;
                 } else{
-                    threadErrorMessage((TONER_NOT_REPLACEABLE_MSG ),false);
-                    tonerAvailability.await();
+                    System.out.println(threadMessages(TONER_NOT_REPLACEABLE_MSG,"Info"));
+                    paperAvailability.await(1000, MILLISECONDS);
                 }
             }
                 if (!passengers.isEmpty() & currentTonerLevel < MIN_TONER_LEVEL & !noTonerTechs()) {
-                System.out.println(TONER_REFILLING);
+                System.out.println(ANSI_RESET + TONER_REFILLING + ANSI_RESET);
                 currentTonerLevel += MAXIMUM_TONER_LEVEL;
                 tonerRefillCount++;
                 tonerAvailability.signalAll();
                 resourceAvailability.signalAll();
-                tecThreadMessages((TONER_REPLACED_MSG));
+                System.out.println(threadMessages(TONER_REPLACED_MSG,"Success"));
             }
         } catch (InterruptedException e) {
-            threadErrorMessage(REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG,true);
-
+            System.out.println(threadMessages(REFILL_TONER_TECH_THREAD_INTERRUPTED_MSG,"Warning"));
         } finally {
             lock.unlock();
         }
@@ -202,18 +207,19 @@ public class TicketMachine implements ServiceTicketMachine, Printer {
         passengers.addAll(tickets);
     }
 
-    private void threadErrorMessage(String str, boolean special){
-        System.out.println((special ? ANSI_RED : ANSI_RESET)
-                    + str + " | Paper Tec Attempts:" + paperRefillCount + " | Toner Tec Attempts: " + tonerRefillCount+ " | Remaining passengers: " + passengers.size() + " | Remaining Paper Level: " + currentPaperLevel + " | Remaining Toner Level: " + currentTonerLevel + ANSI_RESET);
-        }
-    private void tecThreadMessages(String str) {
-        System.out.println( (ANSI_BLUE + "[" + Thread.currentThread().getName() + "]: "
-                        + str
-                        + " | Waiting Passengers Count: " + passengers.size() +" | "+ PAPER_LEVEL_MSG + currentPaperLevel +" | "+TONER_LEVEL_MSG + currentTonerLevel + " | Paper Techs Count: "
-                        + paperTecGroup.activeCount() + " | Toner Techs Count: " + tonerTechGroup.activeCount() +" |"+ "| Refilled Paper count: " +paperRefillCount + " | Refilled Toner count: " +tonerRefillCount +
-                        ANSI_RESET)
-                );
+    private String threadMessages(String mes, String mesType){
+        String generatedMessage = switch (mesType) {
+            case "Error" -> ANSI_RED + "[ Current Thread: " + Thread.currentThread().getName() + "]  " + mes;
+            case "Info" -> ANSI_GREEN + "[ Current Thread: " + Thread.currentThread().getName() + "] " + mes;
+            case "Warning" -> ANSI_YELLOW + "[ Current Thread: " + Thread.currentThread().getName() + "]  " + mes;
+            case "Success" -> ANSI_BLUE + "[ Current Thread: " + Thread.currentThread().getName() + "]  " + mes;
+            case "Print Ticket" -> ANSI_RESET + "[ Current Thread: " + Thread.currentThread().getName() + "]  " + mes;
+            default -> "[ Current Thread: " + Thread.currentThread().getName() + "] .  " + mes;
+        };
+        generatedMessage += String.format(MESSAGE, passengers.size(), currentTonerLevel, currentPaperLevel, tonerRefillCount, paperRefillCount, (TONER_TECH_MAX_REFILL_COUNT * tonerTechGroup.activeCount()) - tonerRefillCount,(PAPER_TECH_MAX_REPLACE_COUNT * paperTecGroup.activeCount()) - paperRefillCount );
+        return generatedMessage;
     }
+
     private boolean noPaperTechs() {
         return paperTecGroup.activeCount() == 0;
     }

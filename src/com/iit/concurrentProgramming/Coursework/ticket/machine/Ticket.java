@@ -1,7 +1,7 @@
-package com.iit.concurrentProgramming.Coursework.ticket_machine;
+package com.iit.concurrentProgramming.Coursework.ticket.machine;
 
-import com.iit.concurrentProgramming.Coursework.ticket_info.PassengerInfo;
-import com.iit.concurrentProgramming.Coursework.ticket_info.TravelInfo;
+import com.iit.concurrentProgramming.Coursework.ticket.info.PassengerInfo;
+import com.iit.concurrentProgramming.Coursework.ticket.info.TravelInfo;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -31,8 +31,7 @@ public class Ticket {
     @Override
     public String toString() {
         return "[ Passenger Name = " + passengerInfo.getName()  +
-                "] "+" Passenger Info => "+ passengerInfo +" Ticket Info =>" +" TicketNumber = " + ticketNumber  +
-                ", TicketPrice = " + ticketPrice +
+                "] " +" Ticket Info =>" +" TicketNumber = " + ticketNumber  +
                 ", Travel = " + travelInfo.getOrigin() + " to " + travelInfo.getDestination();
     }
 }

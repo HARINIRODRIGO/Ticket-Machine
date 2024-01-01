@@ -46,9 +46,9 @@ public final class ConstantValues {
             public static final int SHEETS_PER_PACK = 8;
             public static final int MAX_PAPERS = 10;
             public static final int MAXIMUM_TONER_LEVEL = 20;
-            public static final int MIN_PAPER_LEVEL = 4;
             public static final int MIN_TONER_LEVEL = 10;
-            public static final int TONER_PER_TICKET = 4;
+            public static final int PAPERS_PER_TICKET = 1;
+            public static final int TONERS_PER_TICKET = 1;
             public static final int PAPER_TECH_MAX_REPLACE_COUNT = 3;
             public static final int TONER_TECH_MAX_REFILL_COUNT = 3;
             public static final int PAPER_TECH_WAITING_TIME = 1000;
@@ -70,22 +70,24 @@ public final class ConstantValues {
             public static final String INSUFFICIENT_TONER_AND_PAPER = " insufficient toner and paper";
 
             // Paper refill messages.
-            public static final String PAPER_REPLACED_MSG = "Paper refilled successfully. ";
-            public static final String PAPER_LEVEL_MSG = "Current paper level: ";
-            public static final String SHEETS_IN_TRAY_MSG = "Printer has enough paper.";
+            public static final String PAPER_REPLACED_MSG = "Paper refilled successfully";
+            public static final String SHEETS_IN_TRAY_MSG = "Printer has enough paper";
             public static final String PAPER_REPLACE_SKIP_MSG = "Skipping paper replacement since there are no passengers";
             public static final String PAPER_REFILLING = "Paper refilling in progress.... ";
+            public static final String IMPOSSIBLE_PAPER_REFILLING ="Enough papers but not enough toner. Therefore, paper refilling is skipped.";
             // Toner refill messages.
-            public static final String TONER_NOT_REPLACEABLE_MSG = "Printer has enough toner. ";
-            public static final String TONER_REPLACED_MSG = "Toner replaced successfully. ";
-            public static final String TONER_LEVEL_MSG = "Current toner level: ";
+            public static final String TONER_NOT_REPLACEABLE_MSG = "Printer has enough toner";
+            public static final String TONER_REPLACED_MSG = "Toner replaced successfully";
             public static final String TONER_REPLACE_SKIP_MSG = "Skipping toner replacement since there are no passengers";
             public static final String TONER_REFILLING = "Toner refilling in progress.... ";
+            public static final String IMPOSSIBLE_TONER_REFILLING ="Enough toners but not enough papers. Therefore, toner refilling is skipped.";
             // Print ticket messages.
             public static final String PRINTABLE = "Printable";
-            public static final String TICKET_PRINTING_THREAD_INTERRUPTED_MSG = "Printing thread interrupted.";
+            public static final String TICKET_PRINTING_THREAD_INTERRUPTED_MSG = "Printing thread interrupted";
 
+            public static final String MESSAGE = "| Waiting Passengers count: %d | , Current Toner Available: %d | , Current Paper Available: %d | , Toner Refill Attempts: %d | , Paper Refill Attempts: %d | , Remaining Refill Toner Attempts: %d | , Remaining Refill Paper Attempts: %d | ";
             public static final String NO_PASSENGERS_MSG = "No passengers waiting.";
+            public static final String PRINTING_TICKET_MSG = "Successfully printed ticket for passenger";
 
         }
 
@@ -110,8 +112,10 @@ public final class ConstantValues {
 
             public static final String ANSI_RESET = "\u001B[0m";
             public static final String ANSI_RED = "\u001B[31m";
+            public static final String ANSI_YELLOW = "\u001B[33m";
             public static final String ANSI_GREEN = "\u001B[32m";
             public static final String ANSI_BLUE = "\u001B[34m";
+
         }
     }
 
