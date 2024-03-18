@@ -1,0 +1,82 @@
+/* 
+Author: Harini Rodrigo
+UoW Id: w1809819
+IIT Id: 2019754
+*/
+
+// Define the set of technicians (TEC) and passengers (PAS)
+set TEC = {paperTech, tonerTech}
+set PAS = {pas1, pas2, pas3}
+
+// Define constant values for machine parameters
+const MAX_PAPER_LEVEL = 3
+const MIN_PAPER_LEVEL = 0
+const MIN_TONER_LEVEL = 0
+const MAX_TONER_LEVEL = 3
+const TICKET_COUNT = 3
+
+// Define ranges for paper and toner levels
+range PAPER_RANGE = MIN_PAPER_LEVEL..MAX_PAPER_LEVEL
+range TONER_RANGE = MIN_TONER_LEVEL..MAX_TONER_LEVEL
+
+// Define the TICKET_PRINTER process with paper and toner levels
+TICKET_PRINTER = TICKET_PRINTER[MAX_PAPER_LEVEL][MAX_TONER_LEVEL],
+TICKET_PRINTER[paper: PAPER_RANGE][toner: TONER_RANGE] = (
+    // Transition for printing a ticket when both paper and toner levels are sufficient
+    when (paper > MIN_PAPER_LEVEL & toner > MIN_PAPER_LEVEL)
+        acquireTicketMachine -> printTicket -> releaseTicketMachine -> TICKET_PRINTER[paper - 1][toner - 1] |
+
+    // Transition for acquiring paper refill when paper level is minimum
+    when (paper == MIN_PAPER_LEVEL)
+        acquirePaperRefill -> paperRefill -> releasePaperRefill -> TICKET_PRINTER[MAX_PAPER_LEVEL][toner] |
+
+    // Transition for acquiring toner refill when toner level is minimum
+    when (toner == MIN_TONER_LEVEL)
+        acquireTonerRefill -> tonerRefill -> releaseTonerRefill -> TICKET_PRINTER[paper][MAX_TONER_LEVEL]
+).
+
+// Define the PAPER_TECH process with paper fill operation
+PAPER_TECH = (
+    acquirePaperRefill -> paperRefill -> releasePaperRefill -> PAPER_TECH |
+    exit -> END
+).
+
+// Define the TONER_TECH process with toner refill operation
+TONER_TECH = (
+    acquireTonerRefill -> tonerRefill -> releaseTonerRefill -> TONER_TECH |
+    exit -> END
+).
+
+// Define the PASSENGER process with ticket printing operation
+PASSENGER(TICKETS = TICKET_COUNT) = PASSENGER[TICKETS],
+PASSENGER[ticket: 0..TICKETS] = (
+    // Transition for acquiring a ticket and printing it
+    when (ticket > 0)
+        acquireTicketMachine -> printTicket -> releaseTicketMachine -> PASSENGER[ticket - 1] |
+
+    // Transition for exiting when no more tickets are needed
+    when (ticket == 0)
+        exit -> END
+).
+
+// Parallel composition of processes to form the TICKET_MACHINE system
+|| TICKET_MACHINE = (
+    pas1: PASSENGER(1) / {exit / pas1.exit}
+    || pas2: PASSENGER(1) / {exit / pas2.exit}
+    || pas3: PASSENGER(1) / {exit / pas3.exit}
+    || paperTech: PAPER_TECH / {exit / paperTech.exit}
+    || tonerTech: TONER_TECH / {exit / tonerTech.exit}
+    || {PAS,TEC}::TICKET_PRINTER / //Define transition
+    {
+        // Action relabeling
+        paperTech.acquirePaperRefill / {tonerTech.acquirePaperRefill, PAS.acquirePaperRefill},
+        paperTech.paperRefill / {tonerTech.paperRefill, PAS.paperRefill},
+        paperTech.releasePaperRefill / {tonerTech.releasePaperRefill, PAS.releasePaperRefill},
+        tonerTech.acquireTonerRefill / {paperTech.acquireTonerRefill, PAS.acquireTonerRefill},
+        tonerTech.tonerRefill / {paperTech.tonerRefill, PAS.tonerRefill},
+        tonerTech.releaseTonerRefill / {paperTech.releaseTonerRefill, PAS.releaseTonerRefill},
+        PAS.acquireTicketMachine / TEC.acquireTicketMachine,
+        PAS.printTicket / TEC.printTicket,
+        PAS.releaseTicketMachine / TEC.releaseTicketMachine
+    }
+).
