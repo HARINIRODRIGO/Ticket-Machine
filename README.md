@@ -13,6 +13,6 @@
 <p>To utilize the Ticket Printing System, instantiate the <code>TicketPrintingSystem</code> class, which will automatically initiate the threads for <code>TicketMachine</code>, <code>Passengers</code>, and <code>Technicians</code>. Observe the final Ticket Machine status after the completion of all threads.</p>
 <h3>Implementation Details</h3>
 <p>The Java implementation adheres to the Formal Methods Specification (FSP) model, emphasizing correctness and synchronization through the monitor pattern. The use of random sleep intervals adds a touch of realism to the simulation, enhancing the robustness of the system under diverse conditions.</p>
-<p>This README documentation provides a succinct overview of the Ticket-Machine Java implementation, facilitating understanding and utilization of the system in a concurrent environment.</p>
+
 <hr>
 </div>
